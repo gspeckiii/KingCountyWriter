@@ -6,14 +6,17 @@ from flask_login import LoginManager
 import logging
 from logging.handlers import SMTPHandler
 from logging.handlers import RotatingFileHandler
+from flask_mail import Mail
+from flask_bootstrap import Bootstrap
 import os
 app = Flask(__name__)
+mail = Mail(app)
 login = LoginManager(app)
 login.login_view = 'login'
 app.config.from_object(Config)
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
-
+bootstrap = Bootstrap(app)
 if not app.debug:
     if app.config['MAIL_SERVER']:
         auth = None
