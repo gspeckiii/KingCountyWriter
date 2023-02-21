@@ -4,10 +4,21 @@
 
 
 
-    <div class="container-fluid" >
-    <h1>Welcome to the King County Writer,  {{ current_user.username }}.</h1>
+
+    <div class ="container-fluid" style="height:150px; ">
+        <a class="navbar-brand" href="#">
+            <div class="container-fluid">
+      <img src="{{ url_for('static', filename='img/WriterLogo.png') }}" alt="Logo" height="150">
+            </div>
+    </a>
+        <div class="container" style="float: right;">
+                   <h1>Welcome to the King County Writer,  {{ current_user.username }}.</h1>
     <h2>Share a story about your experiences here in the PNW</h2>
     </div>
+
+
+    </div>
+
     <div class="container-fluid">
  {% if form %}
     <form action="" method="post">
