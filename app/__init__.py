@@ -8,6 +8,7 @@ from logging.handlers import SMTPHandler
 from logging.handlers import RotatingFileHandler
 from flask_mail import Mail
 from flask_bootstrap import Bootstrap
+from os.path import join, dirname, realpath
 import os
 app = Flask(__name__)
 mail = Mail(app)
@@ -17,6 +18,13 @@ app.config.from_object(Config)
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 bootstrap = Bootstrap(app)
+
+app.config['MAX_CONTENT_LENGTH'] = 1024 * 1024
+app.config['UPLOAD_EXTENSIONS'] = ['.jpg', '.png', '.gif']
+UPLOADS_PATH = join(dirname(realpath(__file__)), 'static/img/')
+app.config['UPLOAD_PATH'] = UPLOADS_PATH
+
+
 if not app.debug:
     if app.config['MAIL_SERVER']:
         auth = None

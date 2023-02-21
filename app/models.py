@@ -23,6 +23,8 @@ class User(UserMixin,db.Model):
     username = db.Column(db.String(64), index=True, unique=True)
     email = db.Column(db.String(120), index=True, unique=True)
     password_hash = db.Column(db.String(128))
+    profile_image = db.Column(db.String(20))
+    tags =db.Column(db.String(4000))
     posts = db.relationship('Post', backref='author', lazy='dynamic')
 
     about_me = db.Column(db.String(140))
@@ -46,6 +48,13 @@ class User(UserMixin,db.Model):
         digest = md5(self.email.lower().encode('utf-8')).hexdigest()
         return 'https://www.gravatar.com/avatar/{}?d=identicon&s={}'.format(
             digest, size)
+    def profile_img(self):
+        if self.profile_image is not None:
+            p_img=self.profile_image
+        else:
+            p_img='wizard.jpg'
+        return p_img
+
     def follow(self, user):
         if not self.is_following(user):
             self.followed.append(user)

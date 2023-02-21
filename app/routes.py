@@ -1,5 +1,5 @@
 
-from flask import render_template, flash, redirect, url_for
+from flask import render_template, flash, redirect, url_for,abort
 from app import app
 from app.forms import LoginForm
 from flask_login import current_user, login_user
@@ -19,8 +19,16 @@ from app.forms import EditProfileForm
 from app.forms import ResetPasswordRequestForm
 from app.email import send_password_reset_email
 from app.forms import ResetPasswordForm
-
-
+from werkzeug.utils import secure_filename
+import imghdr
+import os
+def validate_image(stream):
+    header = stream.read(512)
+    stream.seek(0)
+    format = imghdr.what(None, header)
+    if not format:
+        return None
+    return '.' + (format if format != 'jpeg' else 'jpg')
 @app.route('/reset_password/<token>', methods=['GET', 'POST'])
 def reset_password(token):
     if current_user.is_authenticated:
@@ -74,6 +82,7 @@ def index():
     page = request.args.get('page', 1, type=int)
     posts = current_user.followed_posts().paginate(
         page=page, per_page=app.config['POSTS_PER_PAGE'], error_out=False)
+
     next_url = url_for('index', page=posts.next_num) \
         if posts.has_next else None
     prev_url = url_for('index', page=posts.prev_num) \
@@ -146,18 +155,31 @@ def user(username):
 @app.route('/edit_profile', methods=['GET', 'POST'])
 @login_required
 def edit_profile():
+    img=User.profile_img(current_user)
     form = EditProfileForm(current_user.username)
     if form.validate_on_submit():
         current_user.username = form.username.data
         current_user.about_me = form.about_me.data
+        current_user.tags = form.tags.data
+        uploaded_file = request.files['profile_image']
+        filename = secure_filename(uploaded_file.filename)
+        if filename != '':
+            file_ext = os.path.splitext(filename)[1]
+            if file_ext not in app.config['UPLOAD_EXTENSIONS'] or \
+                    file_ext != validate_image(uploaded_file.stream):
+                abort(400)
+            uploaded_file.save(os.path.join(app.config['UPLOAD_PATH'], current_user.get_id() + file_ext))
+            current_user.profile_image = current_user.get_id() + file_ext
+
         db.session.commit()
         flash('Your changes have been saved.')
         return redirect(url_for('edit_profile'))
     elif request.method == 'GET':
         form.username.data = current_user.username
         form.about_me.data = current_user.about_me
+        form.tags.data = current_user.tags
     return render_template('edit_profile.html', title='Edit Profile',
-                           form=form)
+                           form=form,img=img)
 
 
 @app.route('/follow/<username>', methods=['POST'])
