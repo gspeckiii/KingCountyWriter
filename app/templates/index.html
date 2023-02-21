@@ -1,9 +1,14 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <div class="container-fluid">
+
+
+
+    <div class="container-fluid" >
     <h1>Welcome to the King County Writer,  {{ current_user.username }}.</h1>
     <h2>Share a story about your experiences here in the PNW</h2>
+    </div>
+    <div class="container-fluid">
  {% if form %}
     <form action="" method="post">
         {{ form.hidden_tag() }}
@@ -35,5 +40,8 @@
         </ul>
     </nav>
     </div>
-{% endblock %}
 
+<div class="jumbotron" style=" background-color: #1f2226;padding: 10px;" >
+  <img src="{{ url_for('static', filename='img/river_2023_2.jpg') }}" style="height: 20vh; width: 100%; padding: 10px; " class="img-fluid" alt="Responsive Hero Image">
+</div>
+{% endblock %}

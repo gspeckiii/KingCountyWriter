@@ -1,7 +1,6 @@
 {% extends 'bootstrap/base.html' %}
 
 
-
 {% block title %}
     {% if title %}{{ title }} - King County Writer {% else %}Welcome to King County Writer {% endif %}
 {% endblock %}
@@ -49,4 +48,6 @@
         {# application content needs to be provided in the app_content block #}
         {% block app_content %}{% endblock %}
     </div>
+
 {% endblock %}
+
