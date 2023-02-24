@@ -73,12 +73,27 @@ def explore():
 @login_required
 def index():
     form = PostForm()
+
+    try:
+        uploaded_file = request.files['post_img']
+        filename=secure_filename(uploaded_file.filename)
+        if filename != '':
+            file_ext = os.path.splitext(filename)[1]
+            if file_ext not in app.config['UPLOAD_EXTENSIONS'] or \
+                    file_ext != validate_image(uploaded_file.stream):
+                abort(400)
+            filename = str(current_user.get_id()) + '_' + str(filename)
+            uploaded_file.save(os.path.join(app.config['UPLOAD_PATH'], str(filename)))
+    except:
+        filename="wizard.jpg"
+
     if form.validate_on_submit():
-        post = Post(body=form.post.data, author=current_user)
+        post = Post(body=form.post.data, author=current_user,img_caption=form.img_caption.data,post_img=filename)
         db.session.add(post)
         db.session.commit()
         flash('Your post is now live!')
         return redirect(url_for('index'))
+
     page = request.args.get('page', 1, type=int)
     posts = current_user.followed_posts().paginate(
         page=page, per_page=app.config['POSTS_PER_PAGE'], error_out=False)

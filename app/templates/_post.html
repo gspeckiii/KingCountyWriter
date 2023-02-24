@@ -1,19 +1,17 @@
-<div class="container-fluid" style="padding-left:30px;">
-<table class="table table-hover">
-        <tr>
-            <td width="70px">
-                <a href="{{ url_for('user', username=post.author.username) }}">
-                    <img src={{ "/static/img/" + post.author.profile_img() }} alt={{ post.author.profile_img() }} width=280>
-                </a>
-            </td>
-            <td>
-                <a href="{{ url_for('user', username=post.author.username) }}">
-                    {{ post.author.username }}
-                </a>
-                says:
-                <br>
-                {{ post.body }}
-            </td>
-        </tr>
-    </table>
-    </div>
+
+<div style="display: flex;">
+  <div style="  width: 33.33%;  ">
+    <p>{{ post.body }}</p>
+
+  </div>
+  <div  style="width: 66.66%;  ">
+
+      <img src={{ "/static/img/" + post.post_img }} alt={{ post.img_caption}} style="  width: 200px;  height: 100px;  object-fit: cover;">
+        <p>Photo Title:  {{ post.img_caption }}</p>
+      <p>Posted By:  {{post.author.username}}</p>
+  </div>
+</div>
+
+
+
+

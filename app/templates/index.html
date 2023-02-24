@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-
+{% import 'bootstrap/wtf.html' as wtf %}
 {% block content %}
 
 
@@ -12,7 +12,7 @@
             </div>
     </a>
         <div class="container" style="float: right;">
-                   <h1>Welcome to the King County Writer,  {{ current_user.username }}.</h1>
+                   <h1>King County Writer, Your source for local art and activism</h1>
     <h2>Share a story about your experiences here in the PNW</h2>
     </div>
 
@@ -21,21 +21,42 @@
 
     <div class="container-fluid">
  {% if form %}
-    <form action="" method="post">
-        {{ form.hidden_tag() }}
-        <p>
-            {{ form.post.label }}<br>
-            {{ form.post(cols=32, rows=4) }}<br>
-            {% for error in form.post.errors %}
-            <span style="color: red;">[{{ error }}]</span>
-            {% endfor %}
-        </p>
-        <p>{{ form.submit() }}</p>
-    </form>
+    <div class="row" style="padding-top:10px; padding-left:40px;">
+        <div class="col-md-8">
+            {{ wtf.quick_form(form) }}
+        </div>
+    </div>
     {% endif %}
+<div style="padding-top:10px; padding-left:40px;">
+    {% set grouped_posts = {} %}
     {% for post in posts %}
-        {% include '_post.html' %}
+      {% set author_posts = grouped_posts.setdefault(post.author, []) %}
+      {% do author_posts.append(post) %}
     {% endfor %}
+
+    {% for author, author_posts in grouped_posts.items() %}
+      <div style="display: flex;">
+      <div style="  width: 33.33%;">
+          <a href="{{ url_for('user', username=author_posts[0].author_username) }}">
+              <img src={{ "/static/img/" + author.profile_img() }} alt="No Image " style="  width: 100px;  height: 100px;  object-fit: cover;">
+          </a>
+      </div>
+      <div  style="width: 66.66%;"  >
+          <h1>{{author.username}}</h1>
+          <h2>{{ author.about_me }}</h2>
+          <p>{{ author.author_tags }}</p>
+      </div>
+    </div>
+
+
+
+      {% for post in author_posts %}
+       {% include '_post.html' %}
+      {% endfor %}
+    {% endfor %}
+
+</div>
+
     <nav aria-label="...">
         <ul class="pager">
             <li class="previous{% if not prev_url %} disabled{% endif %}">

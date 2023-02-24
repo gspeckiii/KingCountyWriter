@@ -42,7 +42,7 @@ if not app.debug:
         app.logger.addHandler(mail_handler)
         if not os.path.exists('logs'):
             os.mkdir('logs')
-        file_handler = RotatingFileHandler('logs/mwriter.log', maxBytes=10240,
+        file_handler = RotatingFileHandler('logs/writer.log', maxBytes=10240,
                                            backupCount=10)
         file_handler.setFormatter(logging.Formatter(
             '%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'))

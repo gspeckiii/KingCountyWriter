@@ -38,6 +38,7 @@
 {% endblock %}
 
 {% block content %}
+
     <div class="container-fluid">
         {% with messages = get_flashed_messages() %}
         {% if messages %}
@@ -48,7 +49,8 @@
         {% endwith %}
 
         {# application content needs to be provided in the app_content block #}
-        {% block app_content %}{% endblock %}
+        {% block app_content %}
+        {% endblock %}
     </div>
 
 {% endblock %}

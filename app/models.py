@@ -71,6 +71,8 @@ class User(UserMixin,db.Model):
             followers, (followers.c.followed_id == Post.user_id)).filter(
                 followers.c.follower_id == self.id)
         own = Post.query.filter_by(user_id=self.id)
+
+
         return followed.union(own).order_by(Post.timestamp.desc())
     def get_reset_password_token(self, expires_in=600):
         return jwt.encode(
@@ -89,10 +91,15 @@ class User(UserMixin,db.Model):
 
 class Post(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    body = db.Column(db.String(140))
+    body = db.Column(db.String(2000))
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-
+    post_img =db.Column(db.String(200))
+    img_caption=db.Column(db.String(200))
     def __repr__(self):
         return '<Post {}>'.format(self.body)
+
+
+
+
 
