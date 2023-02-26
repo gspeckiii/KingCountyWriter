@@ -1,23 +1,28 @@
 {% extends "base.html" %}
 
 {% block content %}
-        	<div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid black;">
-		<div style="flex: 1; padding: 10px; box-sizing: border-box; flex-basis: 25%;">
-            <div style="  padding: 10px; margin-bottom: 10px; text-align: center;">
+    <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid black;">
+		<div style="width:25%; padding: 10px; box-sizing: border-box; flex-basis: 25%;">
 			<img src="{{ url_for('static', filename='img/WriterLogo.png') }}" alt="Logo" height="150">
-                                            {% if user.last_seen %}
-                    <p style="">Last seen on: {{ moment(user.last_seen).format('LLL') }}</p>
-                    {% endif %}
-            </div>
-		</div>
-		<div style="flex: 1; padding: 10px; box-sizing: border-box; flex-basis: 50%;">
-            <div style="  padding: 10px; margin-bottom: 10px; text-align: center; ">
+        </div>
+        <div style="  width: 25%;">
+
+                  <img src={{ "/static/img/" + user.profile_img() }} alt="No Image "style="border-radius: 50%; border: 2px solid black; height:300px;">
+
+        </div>
+      <div  style="width: 50%;"  >
             <h1 style="text-align:left;">Freedom Zone - Express Yourself and be heard</h1>
-             <h2 style="text-align:left;">Citizen -  {{ user.username }}</h2>
-            {% if user.about_me %}<p>Activist Statement:  {{ user.about_me }}</p>{% endif %}
+          <h2 style="text-align:left;">Citizen -  {{ user.username }}</h2>
+            {% if user.about_me %}<p>Activist Statement:  </p>{% endif %}
+          {% if user.last_seen %}
+              <p style="">Last seen on: {{ moment(user.last_seen).format('LLL') }}</p>
+          {% endif %}
+          {% if user.about_me %}<p>Activist Tags:  {{ user.tags }}</p>{% endif %}
+      <p style="">{{ user.followers.count() }} followers, {{ user.followed.count() }} following.</p>
 
+      </div>
 
-            {% if user == current_user %}
+        {% if user == current_user %}
             <p><a href="{{ url_for('edit_profile') }}">Edit your profile</a></p>
             {% elif not current_user.is_following(user) %}
             <p>
@@ -36,26 +41,32 @@
             {% endif %}
             </div>
 		</div>
-		<div style="flex: 1; padding: 10px; box-sizing: border-box; flex-basis: 25%;">
-			<div style=" padding: 10px; margin-bottom: 10px; text-align: center;">
-                <img src={{ "/static/img/" + user.profile_img() }} alt="No Image " style="border-radius: 50%; border: 2px solid black; height:150px;">
-            <p style="">{{ user.followers.count() }} followers, {{ user.followed.count() }} following.</p>
-            </div>
 
-		</div>
 	</div>
 
-<div style="padding-left:50px; padding-top:20px;">
-        {% for post in posts %}
+<div style="padding-left:50px; padding-top:20px;width:100%;">
+
+    {% for post in posts %}
         {% include '_post.html' %}
     {% endfor %}
-    {% if prev_url %}
-    <a href="{{ prev_url }}">Newer posts</a>
-    {% endif %}
-    {% if next_url %}
-    <a href="{{ next_url }}">Older posts</a>
-    {% endif %}
+    <nav aria-label="...">
+        <ul class="pager">
+            <li class="previous{% if not prev_url %} disabled{% endif %}">
+                <a href="{{ prev_url or '#' }}">
+                    <span aria-hidden="true">&larr;</span> {{ _('Newer posts') }}
+                </a>
+            </li>
+            <li class="next{% if not next_url %} disabled{% endif %}">
+                <a href="{{ next_url or '#' }}">
+                    {{ _('Older posts') }} <span aria-hidden="true">&rarr;</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+
 </div>
+
+
     <div class="jumbotron" style=" background-color: #1f2226;padding: 10px;" >
   <img src="{{ url_for('static', filename='img/island_2023_2.jpg') }}" style="height: 20vh; width: 100%; padding: 10px; " class="img-fluid" alt="Responsive Hero Image">
 </div>

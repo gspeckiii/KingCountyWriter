@@ -86,8 +86,6 @@ def explore():
 @login_required
 def index():
     form = PostForm()
-
-
     try:
         uploaded_file = request.files['post_img']
         filename=secure_filename(uploaded_file.filename)
@@ -106,7 +104,12 @@ def index():
             language = detect(form.post.data)
         except LangDetectException:
             language = ''
-        post = Post(body=form.post.data, author=current_user,img_caption=form.img_caption.data,post_img=filename,language=language)
+        try:
+            post_vid=form.post_vid.data
+        except:
+            post_vid ='https://www.youtube.com/embed/u4taz6dfPQc'
+
+        post = Post(body=form.post.data, author=current_user,img_caption=form.img_caption.data,post_img=filename,language=language,post_vid=post_vid)
         db.session.add(post)
         db.session.commit()
         flash('Your post is now live!')
@@ -196,6 +199,7 @@ def edit_profile():
         current_user.username = form.username.data
         current_user.about_me = form.about_me.data
         current_user.tags = form.tags.data
+
         uploaded_file = request.files['profile_image']
         filename = secure_filename(uploaded_file.filename)
         if filename != '':
@@ -213,6 +217,7 @@ def edit_profile():
         form.username.data = current_user.username
         form.about_me.data = current_user.about_me
         form.tags.data = current_user.tags
+        form.post_vid.data = current_user.post_vid
     return render_template('edit_profile.html', title='Edit Profile',
                            form=form,img=img)
 

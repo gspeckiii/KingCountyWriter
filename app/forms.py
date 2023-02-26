@@ -18,6 +18,7 @@ class PostForm(FlaskForm):
     img_caption = TextAreaField('Photo Caption', validators=[
         DataRequired(), Length(min=1, max=140)])
     post_img = FileField('File')
+    post_vid=TextAreaField('Video Link')
 
     submit = SubmitField('Submit')
 

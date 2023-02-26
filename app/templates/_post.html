@@ -1,36 +1,53 @@
 
 <div style="display: flex;">
-  <div style="  width: 50%; text-align:center; ">
-    <span id="post{{ post.id }}"><p>{{ post.body }}</p></span>
-                  <span id="translation{{ post.id }}">
+      <div style="  width: 50%; text-align:center; ">
+          <a href="{{ url_for('user', username=post.author.username) }}">
+              <p>Posted By:  {{post.author.username}}</p>
+          </a>
+          {% set user_link %}
+                <a href="{{ url_for('user', username=post.author.username) }}">
+                        {{ post.author.username }}
+                </a>
+          {% endset %}
+                {{ _('%(username)s said %(when)s',
+                    username=user_link, when=moment(post.timestamp).fromNow()) }}
+                <br>
+                <span id="post{{ post.id }}">{{ post.body }}</span>
+                {% if post.language and post.language != g.locale %}
+                <br><br>
+                <span id="translation{{ post.id }}">
                     <a href="javascript:translate(
                                 '#post{{ post.id }}',
                                 '#translation{{ post.id }}',
                                 '{{ post.language }}',
                                 '{{ g.locale }}');">{{ _('Translate') }}</a>
                 </span>
-      {{ _('%(username)s said %(when)s', username=user_link, when=moment(post.timestamp).fromNow()) }}
-              {% set user_link %}
-            <a href="{{ url_for('user', username=post.author.username) }}">
-                {{ post.author.username }}
-            </a>
-        {% endset %}
-                      {% if post.language and post.language != g.locale %}
-                <br><br>
-                                <span id="translation{{ post.id }}">
-                    <a href="#">{{ _('Translate') }}</a>
-                </span>
                 {% endif %}
 
-  </div>
-  <div  style="width: 50%;  ">
 
-      <img src={{ "/static/img/" + post.post_img }} alt={{ post.img_caption}} style="  width: 600px;  height: 300px;  object-fit: cover;">
+
+      </div>
+
+      <div  style="width: 50%;  ">
+          <img src={{ "/static/img/" + post.post_img }} alt={{ post.img_caption}} style="  width: 600px;  height: 300px;  object-fit: cover;">
         <p>Photo Title:  {{ post.img_caption }}</p>
-      <p>Posted By:  {{post.author.username}}</p>
-  </div>
+
+
+      </div>
 
 </div>
+{% if post.post_vid %}
+    <div style="width:100%;   display: inline-block;  justify-content: center;  align-items: center;  height: 100vh;">
+        #<iframe style=" width: 80%; height: 80%; justify-content: center;  align-items: center;" src="{{ post.post_vid}}"  allow="autoplay; encrypted-media" ></iframe>
+
+    </div>
+{%  endif %}
+
+
+
+
+
+
 
 
 

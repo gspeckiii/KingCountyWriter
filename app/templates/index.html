@@ -2,76 +2,46 @@
 {% import 'bootstrap/wtf.html' as wtf %}
 {% block content %}
 
-
-
-
-    <div class ="container-fluid" style="height:150px; ">
+<div style="display: flex;">
+    <div style="  width: 25%; text-align:right; ">
         <a class="navbar-brand" href="#">
-            <div class="container-fluid">
-      <img src="{{ url_for('static', filename='img/WriterLogo.png') }}" alt="Logo" height="150">
-            </div>
-    </a>
-        <div class="container" style="float: right;">
-                   <h1>King County Writer, Your source for local art and activism</h1>
-    <h2>Share a story about your experiences here in the PNW</h2>
+            <img src="{{ url_for('static', filename='img/WriterLogo.png') }}" alt="Logo" height="150">
+        </a>
     </div>
 
-
+    <div style="  width: 75%; text-align:center; ">
+        <h1>King County Writer, Your source for local art and activism</h1>
+        <h2>Share a story about your experiences here in the PNW</h2>
     </div>
-
-    <div class="container-fluid">
- {% if form %}
-    <div class="row" style="padding-top:10px; padding-left:40px;">
-        <div class="col-md-8">
-            {{ wtf.quick_form(form) }}
-        </div>
-    </div>
-    {% endif %}
-<div style="padding-top:10px; padding-left:40px;">
-    {% set grouped_posts = {} %}
-    {% for post in posts %}
-      {% set author_posts = grouped_posts.setdefault(post.author, []) %}
-      {% do author_posts.append(post) %}
-    {% endfor %}
-
-    {% for author, author_posts in grouped_posts.items() %}
-      <div style="display: flex;">
-      <div style="  width: 33.33%;">
-          <a href="{{ url_for('user', username=author_posts[0].author_username) }}">
-              <img src={{ "/static/img/" + author.profile_img() }} alt="No Image "style="border-radius: 50%; border: 2px solid black; height:300px;">
-          </a>
-      </div>
-      <div  style="width: 66.66%;"  >
-          <h1>{{author.username}}</h1>
-          <h2>{{ author.about_me }}</h2>
-          <p>{{ author.author_tags }}</p>
-      </div>
-    </div>
-
-
-
-      {% for post in author_posts %}
-       {% include '_post.html' %}
-      {% endfor %}
-    {% endfor %}
-
 </div>
 
+    {% if form %}
+        <div style ="width:100%;padding-top:40px; padding-left:40px;">
+            {{ wtf.quick_form(form) }}
+        </div>
+    {% endif %}
+
+
+
+    {% for post in posts %}
+        {% include '_post.html' %}
+    {% endfor %}
     <nav aria-label="...">
         <ul class="pager">
             <li class="previous{% if not prev_url %} disabled{% endif %}">
                 <a href="{{ prev_url or '#' }}">
-                    <span aria-hidden="true">&larr;</span> Newer posts
+                    <span aria-hidden="true">&larr;</span> {{ _('Newer posts') }}
                 </a>
             </li>
             <li class="next{% if not next_url %} disabled{% endif %}">
                 <a href="{{ next_url or '#' }}">
-                    Older posts <span aria-hidden="true">&rarr;</span>
+                    {{ _('Older posts') }} <span aria-hidden="true">&rarr;</span>
                 </a>
             </li>
         </ul>
     </nav>
-    </div>
+
+
 
 <div class="jumbotron" style=" background-color: #1f2226;padding: 10px;" >
   <img src="{{ url_for('static', filename='img/river_2023_2.jpg') }}" style="height: 20vh; width: 100%; padding: 10px; " class="img-fluid" alt="Responsive Hero Image">
