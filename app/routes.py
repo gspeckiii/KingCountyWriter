@@ -20,8 +20,12 @@ from app.forms import ResetPasswordRequestForm
 from app.email import send_password_reset_email
 from app.forms import ResetPasswordForm
 from werkzeug.utils import secure_filename
+from langdetect import detect, LangDetectException
 import imghdr
 import os
+
+from flask import g
+from flask_babel import get_locale
 def validate_image(stream):
     header = stream.read(512)
     stream.seek(0)
@@ -29,6 +33,15 @@ def validate_image(stream):
     if not format:
         return None
     return '.' + (format if format != 'jpeg' else 'jpg')
+from flask import jsonify
+from app.translate import translate
+
+@app.route('/translate', methods=['POST'])
+@login_required
+def translate_text():
+    return jsonify({'text': translate(request.form['text'],
+                                      request.form['source_language'],
+                                      request.form['dest_language'])})
 @app.route('/reset_password/<token>', methods=['GET', 'POST'])
 def reset_password(token):
     if current_user.is_authenticated:
@@ -74,6 +87,7 @@ def explore():
 def index():
     form = PostForm()
 
+
     try:
         uploaded_file = request.files['post_img']
         filename=secure_filename(uploaded_file.filename)
@@ -88,7 +102,11 @@ def index():
         filename="wizard.jpg"
 
     if form.validate_on_submit():
-        post = Post(body=form.post.data, author=current_user,img_caption=form.img_caption.data,post_img=filename)
+        try:
+            language = detect(form.post.data)
+        except LangDetectException:
+            language = ''
+        post = Post(body=form.post.data, author=current_user,img_caption=form.img_caption.data,post_img=filename,language=language)
         db.session.add(post)
         db.session.commit()
         flash('Your post is now live!')
@@ -111,6 +129,7 @@ def index():
 
 @app.before_request
 def before_request():
+    g.locale = str(get_locale())
     if current_user.is_authenticated:
         current_user.last_seen = datetime.utcnow()
         db.session.commit()
@@ -142,6 +161,7 @@ def login():
 def register():
     if current_user.is_authenticated:
         return redirect(url_for('index'))
+
     form = RegistrationForm()
     if form.validate_on_submit():
         user = User(username=form.username.data, email=form.email.data)

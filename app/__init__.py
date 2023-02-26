@@ -9,11 +9,19 @@ from logging.handlers import RotatingFileHandler
 from flask_mail import Mail
 from flask_bootstrap import Bootstrap
 from os.path import join, dirname, realpath
+from flask_moment import Moment
+from flask_babel import Babel
+from flask_babel import lazy_gettext as _l
+from flask import request
 import os
 app = Flask(__name__)
+babel = Babel(app)
+moment=Moment(app)
 mail = Mail(app)
 login = LoginManager(app)
 login.login_view = 'login'
+login.login_message = _l('Please log in to access this page.')
+
 app.config.from_object(Config)
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
@@ -23,7 +31,9 @@ app.config['MAX_CONTENT_LENGTH'] = 1024 * 1024
 app.config['UPLOAD_EXTENSIONS'] = ['.jpg', '.png', '.gif']
 UPLOADS_PATH = join(dirname(realpath(__file__)), 'static/img/')
 app.config['UPLOAD_PATH'] = UPLOADS_PATH
-
+@babel.localeselector
+def get_locale():
+    return request.accept_languages.best_match(app.config['LANGUAGES'])
 
 if not app.debug:
     if app.config['MAIL_SERVER']:

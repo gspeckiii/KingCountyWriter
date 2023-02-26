@@ -8,8 +8,6 @@ from time import time
 import jwt
 from app import app
 
-    # ...
-
 @login.user_loader
 def load_user(id):
     return User.query.get(int(id))
@@ -96,6 +94,7 @@ class Post(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     post_img =db.Column(db.String(200))
     img_caption=db.Column(db.String(200))
+    language = db.Column(db.String(5))
     def __repr__(self):
         return '<Post {}>'.format(self.body)
 

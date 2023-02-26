@@ -5,6 +5,7 @@ from app.models import User
 from wtforms import StringField, TextAreaField, SubmitField
 from wtforms.validators import DataRequired, Length
 from flask_wtf.file import FileField
+from flask_babel import lazy_gettext as _l
 class ResetPasswordForm(FlaskForm):
     password = PasswordField('Password', validators=[DataRequired()])
     password2 = PasswordField(
@@ -17,6 +18,7 @@ class PostForm(FlaskForm):
     img_caption = TextAreaField('Photo Caption', validators=[
         DataRequired(), Length(min=1, max=140)])
     post_img = FileField('File')
+
     submit = SubmitField('Submit')
 
 
@@ -56,7 +58,7 @@ class RegistrationForm(FlaskForm):
             raise ValidationError('Please use a different email address.')
 
 class LoginForm(FlaskForm):
-    username = StringField('Username', validators=[DataRequired()])
+    username = StringField(_l('Username'), validators=[DataRequired()])
     password = PasswordField('Password', validators=[DataRequired()])
     remember_me = BooleanField('Remember Me')
     submit = SubmitField('Sign In')
