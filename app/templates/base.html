@@ -1,40 +1,95 @@
 {% extends 'bootstrap/base.html' %}
 
+{% block head %}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-colorpicker/3.4.0/css/bootstrap-colorpicker.min.css" integrity="sha512-HbivCn+gWihVcwFhXTJymwVfzZiuYm7D9+1aI9+j0o0rkLPtT8TtRO+FRD0sIvzfB0tW1pqX9bRyR1+OvMgC0g==" crossorigin="anonymous" />
+<<link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+    <style>
+    .navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  background-color: #333;
+  color: #fff;
+}
+
+.logo {
+  font-size: 30px;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.nav-links {
+  display: flex;
+  justify-content: space-between;
+  width: 60%;
+}
+
+.nav-links li {
+  list-style: none;
+}
+
+.nav-links a {
+  color: #fff;
+  text-decoration: none;
+  padding: 10px;
+}
+
+.nav-icon {
+  display: none;
+  color: #fff;
+  font-size: 24px;
+}
+
+@media screen and (max-width: 768px) {
+  .nav-links {
+    display: none;
+  }
+  .nav-icon {
+    display: block;
+  }
+  .nav-icon:hover {
+    cursor: pointer;
+  }
+  .navbar.responsive .nav-links {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+  }
+  .navbar.responsive .nav-links li {
+    margin-bottom: 10px;
+  }
+}
+    </style>
+{% endblock %}
+
+
 
 {% block title %}
     {% if title %}{{ title }} - King County Writer {% else %}Welcome to King County Writer {% endif %}
+
 {% endblock %}
 
 {% block navbar %}
-    <nav class="navbar navbar-default">
-        <div class="container">
-
-            <div class="navbar-header">
-
-                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
-                    <span class="sr-only">Toggle navigation</span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                </button>
-                <a class="navbar-brand" href="{{ url_for('index') }}">KCW Experience</a>
-            </div>
-            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-                <ul class="nav navbar-nav">
+    <nav class="navbar">
+            <a href="{{ url_for('index') }}" class="logo">
+                <img src="{{ url_for('static', filename='img/logo_kcw.png') }}" alt="Logo" height="150">
+            </a>
+                <ul class="navbar-links">
                     <li><a href="{{ url_for('index') }}">Home</a></li>
                     <li><a href="{{ url_for('explore') }}">Explore</a></li>
-                </ul>
-                <ul class="nav navbar-nav navbar-right">
                     {% if current_user.is_anonymous %}
                     <li><a href="{{ url_for('login') }}">Login</a></li>
                     {% else %}
                     <li><a href="{{ url_for('user', username=current_user.username) }}">Profile</a></li>
+                     <li><a href="{{ url_for('submit_style', username=current_user.username) }}">Style</a></li>
                     <li><a href="{{ url_for('logout') }}">Logout</a></li>
                     {% endif %}
                 </ul>
-            </div>
-        </div>
+
     </nav>
+    <h3 id="demo" onclick="myFunction()">Click me to change my color.</h3>
 {% endblock %}
 
 {% block content %}
@@ -52,6 +107,7 @@
         {% block app_content %}
         {% endblock %}
 
+
     </div>
 {% endblock %}
 
@@ -59,6 +115,32 @@
     {{ super() }}
     {{ moment.include_moment() }}
     {{ moment.lang(g.locale) }}
+
+
+<script>
+function myFunction() {
+  document.getElementById("demo").style.color = "red";
+}
+
+const navSlide = () => {
+  const burger = document.querySelector('.nav-icon');
+  const nav = document.querySelector('.nav-links');
+  const navLinks = document.querySelectorAll('.nav-links li');
+  burger.addEventListener('click', () => {
+    nav.classList.toggle('responsive');
+    navLinks.forEach((link, index) => {
+      if (link.style.animation) {
+        link.style.animation = '';
+      } else {
+        link.style.animation = `navLinkFade 0.5s ease forwards ${index / 7 + 0.5}s`;
+      }
+    });
+    burger.classList.toggle('toggle');
+  });
+}
+
+navSlide();
+</script>
     <script>
         function translate(sourceElem, destElem, sourceLang, destLang) {
             $(destElem).html('<img src="{{ url_for('static', filename='loading.gif') }}">');
@@ -73,6 +155,8 @@
             });
         }
     </script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-colorpicker/3.4.0/js/bootstrap-colorpicker.min.js" integrity="sha512-HJnBk+Z8Fp08HHgXJF1D/61aI04PhPjWJ2pdNwqG3Ke1Xdv8wjghLgQve9G4B3MVyf71E6U5JP5lo5wLp5/eZw==" crossorigin="anonymous"></script>
 
 
 {% endblock %}

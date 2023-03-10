@@ -1,0 +1,25 @@
+<div style="display: flex;">
+<div style="  width: 100%; text-align:center; ">
+                <span id="style{{ style.id }}">{{ style.style_nm }}</span>
+                 <span id="style{{ style.id }}">{{ style.style_inspire }}</span>
+                {% if style.language and style.language != g.locale %}
+                <br><br>
+                <span id="translation{{ style.id }}"> <a href="javascript:translate('#style{{ style.id }}', '#translation{{style.id }}','{{ style.language }}', '{{ g.locale }}');">{{ _('Translate') }}</a>    </span>
+                {% endif %}
+</div>
+    <div style="  width: 100%; text-align:center; ">
+      <div  style="width: 33%;  ">
+          <img src={{ "/static/img/" + style.sq_nm|replace('.','_xl.') }} alt={{ style.sq_nm|replace('.','_xl.')}} >
+      </div>
+      <div  style="width: 33%;  ">
+          <img src={{ "/static/img/" + style.pt_nm|replace('.','_xl.') }} alt={{ style.pt_nm|replace('.','_xl.')}} >
+      </div>
+      <div  style="width: 33%;  ">
+          <img src={{ "/static/img/" + style.ls_nm|replace('.','_xl.') }} alt={{ style.ls_nm|replace('.','_xl.') }} >
+      </div>
+
+      <div  style="width: 100%;  ">
+          <img src={{ "/static/img/" + style.pan_nm|replace('.','_xl.') }} alt={{style.pan_nm|replace('.','_xl.') }} >
+      </div>
+    </div>
+</div>

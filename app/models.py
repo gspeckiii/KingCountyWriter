@@ -24,7 +24,7 @@ class User(UserMixin,db.Model):
     profile_image = db.Column(db.String(20))
     tags =db.Column(db.String(4000))
     posts = db.relationship('Post', backref='author', lazy='dynamic')
-
+    styles = db.relationship('Style', backref='stylist', lazy='dynamic')
     about_me = db.Column(db.String(140))
     last_seen = db.Column(db.DateTime, default=datetime.utcnow)
 
@@ -69,9 +69,14 @@ class User(UserMixin,db.Model):
             followers, (followers.c.followed_id == Post.user_id)).filter(
                 followers.c.follower_id == self.id)
         own = Post.query.filter_by(user_id=self.id)
-
-
         return followed.union(own).order_by(Post.timestamp.desc())
+
+    def followed_styles(self):
+        followed = Style.query.join(
+            followers, (followers.c.followed_id == Style.user_id)).filter(
+            followers.c.follower_id == self.id)
+        own = Style.query.filter_by(user_id=self.id)
+        return followed.union(own).order_by(Style.timestamp.desc())
     def get_reset_password_token(self, expires_in=600):
         return jwt.encode(
             {'reset_password': self.id, 'exp': time() + expires_in},
@@ -98,6 +103,25 @@ class Post(db.Model):
     language = db.Column(db.String(5))
     def __repr__(self):
         return '<Post {}>'.format(self.body)
+
+class Style(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    timestamp=db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    style_nm=db.Column(db.String(20), index=True, unique=True)
+    style_inspire=db.Column(db.String(250))
+    pan_nm = db.Column(db.String(100))
+    pan_color=db.Column(db.String(10))
+    ls_nm = db.Column(db.String(100))
+    ls_color=db.Column(db.String(10))
+    sq_nm = db.Column(db.String(100))
+    sq_color=db.Column(db.String(10))
+    pt_nm = db.Column(db.String(100))
+    pt_color=db.Column(db.String(10))
+    language = db.Column(db.String(5))
+    def __repr__(self):
+        return '<Style {}>'.format(self.body)
+
 
 
 

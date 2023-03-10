@@ -9,13 +9,15 @@ from flask import request
 from werkzeug.urls import url_parse
 from flask_login import logout_user
 from app import db
+
 from app.forms import RegistrationForm
 from app.forms import PostForm
 from app.models import Post
+from app.models import Style
 from datetime import datetime
 from app.forms import EmptyForm
 from app.forms import EditProfileForm
-
+from app.forms import SubmitStyleForm
 from app.forms import ResetPasswordRequestForm
 from app.email import send_password_reset_email
 from app.forms import ResetPasswordForm
@@ -23,9 +25,17 @@ from werkzeug.utils import secure_filename
 from langdetect import detect, LangDetectException
 import imghdr
 import os
+import requests
+
 
 from flask import g
 from flask_babel import get_locale
+from PIL import Image
+
+def n_height(o_height,o_width,n_width):
+    x=(o_width*n_width)/o_height
+    return x
+
 def validate_image(stream):
     header = stream.read(512)
     stream.seek(0)
@@ -207,6 +217,8 @@ def edit_profile():
             if file_ext not in app.config['UPLOAD_EXTENSIONS'] or \
                     file_ext != validate_image(uploaded_file.stream):
                 abort(400)
+
+
             uploaded_file.save(os.path.join(app.config['UPLOAD_PATH'], current_user.get_id() + file_ext))
             current_user.profile_image = current_user.get_id() + file_ext
 
@@ -217,9 +229,132 @@ def edit_profile():
         form.username.data = current_user.username
         form.about_me.data = current_user.about_me
         form.tags.data = current_user.tags
-        form.post_vid.data = current_user.post_vid
+
+
     return render_template('edit_profile.html', title='Edit Profile',
                            form=form,img=img)
+
+@app.route('/submit_style', methods=['GET', 'POST'])
+@login_required
+def submit_style():
+
+    form = SubmitStyleForm(current_user.username,current_user.get_id())
+
+    if form.validate_on_submit():
+
+        style_nm=form.style_nm.data
+        uploaded_file = request.files['nm']
+        filename = secure_filename(uploaded_file.filename)
+        try:
+            language = detect(form.style_inspire.data)
+        except LangDetectException:
+            language = ''
+
+        if filename != '' :
+            file_ext = os.path.splitext(filename)[1]
+            if file_ext not in app.config['UPLOAD_EXTENSIONS'] or \
+                    file_ext != validate_image(uploaded_file.stream):
+                abort(400)
+            img_nm= str(current_user.id) + '_style_' + style_nm
+            image = Image.open(uploaded_file)
+            width, height = image.size
+            rat = float(width) / float(height)
+            xl = 2400
+            lg = 1200
+            med = 990
+            sm = 760
+            if rat > 1.34:
+                img_rat = 'pan'
+            elif rat > 1.05:
+                img_rat = 'ls'
+            elif rat < .95:
+                img_rat = 'pt'
+            else:
+                img_rat = 'sq'
+            out_dict = {}
+            sz_lst = {'xl': xl, 'lg': lg, 'med': med, 'sm': sm}
+            for key,value in sz_lst.items():
+                new_width = value
+                img_input = key
+                new_height = int((xl * width) / int(height))
+                new_size = (int(new_width), int(new_height))
+                image.resize(new_size)
+                img_db_nm=str(img_nm) +'_'+ str(img_rat)
+                img_name = img_db_nm +'_'+ str(img_input) + str(file_ext)
+                image.save(os.path.join(app.config['UPLOAD_PATH'], img_name))
+            filename_pan=''
+            filename_ls = ''
+            filename_sq = ''
+            filename_pt = ''
+            if img_rat=='pan':
+                filename_pan=img_db_nm
+            elif img_rat=='ls':
+                filename_ls=img_db_nm
+            elif img_rat=='sq':
+                filename_sq=img_db_nm
+            elif img_rat=='pt':
+                filename_pt=img_db_nm
+
+
+        # Check if a record with the same style_nm and stylist already exists
+        stylist = User.query.filter_by(username=current_user.id).first()
+        style = Style.query.filter_by(style_nm=form.style_nm.data, stylist=stylist).first()
+        if style:
+            # If the record exists, update its attributes
+            if img_rat=='pan':
+                style.pan_color = form.color.data
+                style.pan_nm = filename_pan
+            if img_rat=='ls':
+                style.ls_color = form.color.data
+                style.ls_nm = filename_ls
+            if img_rat=='sq':
+                style.sq_color = form.color.data
+                style.sq_nm = filename_sq
+            if img_rat=='pt':
+                style.pt_color = form.color.data
+                style.pt_nm = filename_pt
+            style.timestamp = datetime.utcnow
+            style.style_inspire = form.style_inspire.data
+            style.style_nm = form.style_nm.data
+            style.language=language
+
+        else:
+            # If the record doesn't exist, create a new record
+            if img_rat=='pan':
+                style = Style(style_nm=form.style_nm.data, stylist=current_user, pan_color=form.color.data, pan_nm=filename_pan,style_inspire = form.style_inspire.data,language=language)
+                db.session.add(style)
+            if img_rat=='ls':
+                style = Style(style_nm=form.style_nm.data, stylist=current_user,ls_color=form.color.data, ls_nm=filename_ls,style_inspire = form.style_inspire.data,language=language)
+                db.session.add(style)
+            if img_rat=='sq':
+                style = Style(style_nm=form.style_nm.data, stylist=current_user, sq_color=form.color.data, sq_nm=filename_sq,style_inspire = form.style_inspire.data,language=language)
+                db.session.add(style)
+            if img_rat=='pt':
+                style = Style(style_nm=form.style_nm.data, stylist=current_user, pt_color=form.color.data,pt_nm=filename_pt,style_inspire = form.style_inspire.data,language=language)
+                db.session.add(style)
+
+        # Commit the changes to the database
+        db.session.commit()
+        flash('Your style is now live!')
+        return redirect(url_for('submit_style'))
+    elif request.method == 'GET':
+        stylist = User.query.filter_by(username=current_user.id).first()
+        style = Style.query.filter_by(style_nm=form.style_nm.data, stylist=stylist).first()
+        page = request.args.get('page', 1, type=int)
+
+        styles = current_user.followed_styles().paginate(
+            page=page, per_page=3, error_out=False)
+
+        next_url = url_for('submit_style', page=styles.next_num) \
+            if styles.has_next else None
+        prev_url = url_for('submit_style', page=styles.prev_num) \
+            if styles.has_prev else None
+        return render_template('submit_style.html', title='Home', form=form,
+                               styles=styles.items, next_url=next_url,
+                               prev_url=prev_url)
+
+    return render_template('submit_style.html', title='Add Style',
+                           form=form, )
 
 
 @app.route('/follow/<username>', methods=['POST'])
